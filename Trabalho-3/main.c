@@ -22,6 +22,7 @@ void liberar_contato(contato* contato);
 
 struct contato* filtrar_contato_por_nome(char* nome_completo);
 
+void criar_lista_com_arquivo();
 void inserir_novo_registro();
 int remover_registro();
 int mostrar_registro();
@@ -31,8 +32,7 @@ void sair();
 void mostrar_menu();
 
 int main() {
-    // FILE *contacts_file;
-    // contacts_file = fopen("contatos.txt",'w');
+    criar_lista_com_arquivo();
     mostrar_menu();
 
     return 0;
@@ -92,6 +92,33 @@ struct contato* filtrar_contato_por_nome(char* nome_completo) {
         contato_temporario = contato_temporario->posterior;
     }
     return NULL;
+}
+
+void criar_lista_com_arquivo() {
+    FILE *contatos_arquivo;
+    contatos_arquivo = fopen("contatos.txt","r");
+
+    if(!contatos_arquivo) 
+        exit(1);
+
+    char nome_completo[101];
+    char telefone[11];
+    char endereco[101];
+    char cep[9];
+    char data_de_nascimento[11];    
+
+    while (!feof(contatos_arquivo)) {
+        fscanf(contatos_arquivo, "%[^\n]s ", nome_completo);
+        fscanf(contatos_arquivo, "%s\n", telefone);
+        fscanf(contatos_arquivo, "%[^\n]s ", endereco);
+        fscanf(contatos_arquivo, "%s\n", cep);
+        fscanf(contatos_arquivo, "%s\n", data_de_nascimento);
+        fscanf(contatos_arquivo, "$\n");
+
+        contato* novo_contato = criar_novo_contato(nome_completo, telefone, endereco, cep, data_de_nascimento);
+        inserir_contato(novo_contato);
+    }
+    fclose(contatos_arquivo);
 }
 
 void inserir_novo_registro() {
@@ -183,6 +210,25 @@ void mostrar_todos_registros() {
 }
 
 void sair() {
+    FILE *contatos_arquivo;
+    contatos_arquivo = fopen("contatos.txt","w");
+
+    contato* contato_temporario = cabecalho;
+    while(contato_temporario) {
+        if(contato_temporario == NULL) 
+            break;
+
+        fprintf(contatos_arquivo, "%s\n", contato_temporario->nome_completo);
+        fprintf(contatos_arquivo, "%s\n", contato_temporario->telefone);
+        fprintf(contatos_arquivo, "%s\n", contato_temporario->endereco);
+        fprintf(contatos_arquivo, "%s\n", contato_temporario->cep);
+        fprintf(contatos_arquivo, "%s\n", contato_temporario->data_de_nascimento);
+        fprintf(contatos_arquivo, "$\n");
+
+        contato_temporario = contato_temporario->posterior;
+    }
+
+    fclose(contatos_arquivo);
     exit(1);
 }
 
@@ -219,4 +265,4 @@ void mostrar_menu() {
             mostrar_menu();
             break;
     }
-}
+} 
