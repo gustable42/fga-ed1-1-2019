@@ -21,6 +21,7 @@ void inserir_contato(contato* contato);
 void liberar_contato(contato* contato);
 
 struct contato* filtrar_contato_por_nome(char* nome_completo);
+void ordenar_lista();
 
 void criar_lista_com_arquivo();
 void inserir_novo_registro();
@@ -92,6 +93,34 @@ struct contato* filtrar_contato_por_nome(char* nome_completo) {
         contato_temporario = contato_temporario->posterior;
     }
     return NULL;
+}
+
+void ordenar_lista() {
+    contato *i, *j, *temp;
+
+    for(i=cabecalho; i->posterior != NULL; i=i->posterior) {
+        for(j=i->posterior; j != NULL; j=j->posterior) {
+            if(strcmp(i->nome_completo, j->nome_completo) > 0) {
+                strcpy(temp->nome_completo, i->nome_completo);
+                strcpy(temp->telefone, i->telefone);
+                strcpy(temp->endereco, i->endereco);
+                strcpy(temp->cep, i->cep);
+                strcpy(temp->data_de_nascimento, i->data_de_nascimento);
+
+                strcpy(i->nome_completo, j->nome_completo);
+                strcpy(i->telefone, j->nome_completo);
+                strcpy(i->endereco, j->endereco);
+                strcpy(i->cep, j->cep);
+                strcpy(i->data_de_nascimento, j->data_de_nascimento);
+
+                strcpy(j->nome_completo, temp->nome_completo);
+                strcpy(j->telefone, temp->telefone);
+                strcpy(j->endereco, temp->endereco);
+                strcpy(j->cep, temp->cep);
+                strcpy(j->data_de_nascimento, temp->data_de_nascimento);
+            }
+        }
+    }
 }
 
 void criar_lista_com_arquivo() {
@@ -185,6 +214,8 @@ int mostrar_registro() {
 }
 
 void mostrar_todos_registros() {
+    ordenar_lista();
+    
     contato* contato_temporario = cabecalho;
     if(contato_temporario == NULL) {
         printf(" --------------------------- \n");
