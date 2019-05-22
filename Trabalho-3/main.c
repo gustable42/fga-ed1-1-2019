@@ -202,6 +202,9 @@ void inserir_novo_registro() {
 int remover_registro() {
     char nome_completo[101];
     printf("Insira o nome completo do contato: ");
+    while(!validar_nome_completo(nome_completo)) {
+        gets(nome_completo);
+    }
 
     gets(nome_completo);
 
@@ -221,6 +224,9 @@ int mostrar_registro() {
     char nome_completo[101];
     printf("Insira o nome completo do contato: ");
     gets(nome_completo);
+    while(!validar_nome_completo(nome_completo)) {
+        gets(nome_completo);
+    }
 
     contato* contato = filtrar_contato_por_nome(nome_completo);
     if(contato == NULL) {
