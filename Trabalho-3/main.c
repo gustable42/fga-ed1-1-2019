@@ -32,6 +32,12 @@ void sair();
 
 void mostrar_menu();
 
+int validar_nome_completo(char* nome_completo);
+int validar_telefone(char* telefone);
+int validar_endereco(char* endereco);
+int validar_cep(char* cep);
+int validar_data_de_nascimento(char* data_de_nascimento);
+
 int main() {
     criar_lista_com_arquivo();
     mostrar_menu();
@@ -159,14 +165,34 @@ void inserir_novo_registro() {
 
     printf("Insira o nome completo: ");
     gets(nome_completo);
+    while(!validar_nome_completo(nome_completo)) {
+        gets(nome_completo);
+    }
+
     printf("Insira o telefone: ");
     gets(telefone);
+    while(!validar_telefone(telefone)) {
+        printf("O formato para o telefone é: 00000-0000\n");
+        gets(telefone);
+    }
+
     printf("Insira o endereco: ");
     gets(endereco);
+    while(!validar_endereco(endereco)) {
+        gets(endereco);
+    }
+
     printf("Insira seu CEP: ");
     gets(cep);
+    while(!validar_cep(cep)) {
+        gets(cep);
+    }
+
     printf("Insira a data de nascimento: ");
     gets(data_de_nascimento);
+    while(!validar_data_de_nascimento(data_de_nascimento)) {
+        gets(data_de_nascimento);
+    }
 
     contato* contato = criar_novo_contato(nome_completo, telefone, endereco, cep, data_de_nascimento);
     inserir_contato(contato);
@@ -176,6 +202,7 @@ void inserir_novo_registro() {
 int remover_registro() {
     char nome_completo[101];
     printf("Insira o nome completo do contato: ");
+
     gets(nome_completo);
 
     contato* contato = filtrar_contato_por_nome(nome_completo);
@@ -296,4 +323,108 @@ void mostrar_menu() {
             mostrar_menu();
             break;
     }
-} 
+}
+
+int validar_nome_completo(char* nome_completo) {
+    int tamanho = strlen(nome_completo);
+
+    for(int i = 0; i < tamanho; i++) {
+        if(nome_completo[i] == ' ') return 1;
+    }
+
+    printf("Seu nome deve ser completo\n");
+    return 0;
+}
+
+int validar_telefone(char* telefone) {
+    int digitos = 0;
+    int traco = 0;
+    
+    if(strlen(telefone) != 10) {
+        printf("Seu telefone deve ter 10 dígitos contando o traco\n");
+        return 0;
+    }
+
+    for(int i = 0; i < 10; i++) {
+        if(i < 5 || i > 5)
+            if(telefone[i] == '-') {
+                return 0;
+            } else
+                digitos++;
+        if(i == 5)
+            if(telefone[i] != '-') {
+                return 0;
+            } else
+                traco++;
+    }
+    if(digitos == 9 && traco == 1)
+        return 1;
+    else 
+        return 0;
+}
+
+int validar_endereco(char* endereco) {
+    if(strlen(endereco) < 5) {
+        printf("Seu endereço não possui o numero de caracteres minimo\n");
+        return 0;
+    } else if(strlen(endereco) > 100) {
+        printf("Seu endereco excede o número máximo de caracteres\n");
+        return 0;
+    } else
+        return 1;
+    
+}
+
+int validar_cep(char* cep) {
+    if(strlen(cep) != 8) {
+        printf("CEP possui 8 digitos\n");
+        return 0;
+    }
+    return 1;
+}
+
+int validar_data_de_nascimento(char* data_de_nascimento) {
+    int tamanho = strlen(data_de_nascimento);
+
+    if(strlen(data_de_nascimento) != 10) {
+        printf("Sua data de nascimento foi inserida errada, digite novamente\n");
+        return 0;
+    }
+    if(data_de_nascimento[2] != '/' || data_de_nascimento[5] != '/') {
+        printf("O formato aceito para data de nascimento é: DD/MM/AAAA\n");
+        printf("Não se esqueça das barras\n");
+        return 0;
+    }
+
+    int dia[2];
+    dia[0] = (int)data_de_nascimento[0] - '0';
+    dia[1] = (int)data_de_nascimento[1] - '0';
+
+    if(dia[0] > 3 || (dia[0] == 3 && dia[1] > 1)) {
+        printf("Dia inválido\n");
+        return 0;
+    }
+
+    int mes[2];
+    mes[0] = (int)data_de_nascimento[3] - '0';
+    mes[1] = (int)data_de_nascimento[4] - '0';
+
+    if(mes[0] > 1 || (mes[0] == 1 && mes[1] > 2)) {
+        printf("Mês inválido\n");
+        return 0;
+    }
+
+    int ano[4];
+    ano[0] = (int)data_de_nascimento[6] - '0';
+    ano[1] = (int)data_de_nascimento[7] - '0';
+    ano[2] = (int)data_de_nascimento[8] - '0';
+    ano[3] = (int)data_de_nascimento[9] - '0';
+
+    if(ano[0] > 2 || (ano[0] == 2 && ano[1] > 0) || (ano[0] == 2) && ano[2] > 1) {
+        printf("Você é um viajante do tempo?\n");
+        printf("Ainda ninguém nasceu nessa data\n");
+        return 0;
+    }
+
+    return 1;
+}
