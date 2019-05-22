@@ -98,6 +98,8 @@ struct contato* filtrar_contato_por_nome(char* nome_completo) {
 
         contato_temporario = contato_temporario->posterior;
     }
+    printf("Contato não encontrado\n");
+    printf("Lembre-se que nomes e sobrenomes comecao com letra maiúscula");
     return NULL;
 }
 
