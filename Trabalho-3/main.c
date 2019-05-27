@@ -21,7 +21,6 @@ void inserir_contato(contato* contato);
 void liberar_contato(contato* contato);
 
 struct contato* filtrar_contato_por_nome(char* nome_completo);
-void ordenar_lista();
 
 void criar_lista_com_arquivo();
 void inserir_novo_registro();
@@ -75,7 +74,7 @@ void inserir_contato(contato *contato) {
 void liberar_contato(contato* contato) {
     if(cabecalho == NULL || contato == NULL)
         return;
-    
+
     if(contato == cabecalho)
         cabecalho = contato->posterior;
 
@@ -98,51 +97,21 @@ struct contato* filtrar_contato_por_nome(char* nome_completo) {
 
         contato_temporario = contato_temporario->posterior;
     }
-    printf("Contato não encontrado\n");
-    printf("Lembre-se que nomes e sobrenomes comecao com letra maiúscula");
     return NULL;
-}
-
-void ordenar_lista() {
-    contato *i, *j, *temp;
-
-    for(i=cabecalho; i->posterior != NULL; i=i->posterior) {
-        for(j=i->posterior; j != NULL; j=j->posterior) {
-            if(strcmp(i->nome_completo, j->nome_completo) > 0) {
-                strcpy(temp->nome_completo, i->nome_completo);
-                strcpy(temp->telefone, i->telefone);
-                strcpy(temp->endereco, i->endereco);
-                strcpy(temp->cep, i->cep);
-                strcpy(temp->data_de_nascimento, i->data_de_nascimento);
-
-                strcpy(i->nome_completo, j->nome_completo);
-                strcpy(i->telefone, j->nome_completo);
-                strcpy(i->endereco, j->endereco);
-                strcpy(i->cep, j->cep);
-                strcpy(i->data_de_nascimento, j->data_de_nascimento);
-
-                strcpy(j->nome_completo, temp->nome_completo);
-                strcpy(j->telefone, temp->telefone);
-                strcpy(j->endereco, temp->endereco);
-                strcpy(j->cep, temp->cep);
-                strcpy(j->data_de_nascimento, temp->data_de_nascimento);
-            }
-        }
-    }
 }
 
 void criar_lista_com_arquivo() {
     FILE *contatos_arquivo;
     contatos_arquivo = fopen("contatos.txt","r");
 
-    if(!contatos_arquivo) 
+    if(!contatos_arquivo)
         exit(1);
 
     char nome_completo[101];
     char telefone[11];
     char endereco[101];
     char cep[9];
-    char data_de_nascimento[11];    
+    char data_de_nascimento[11];
 
     while (!feof(contatos_arquivo)) {
         fscanf(contatos_arquivo, "%[^\n]s ", nome_completo);
@@ -164,13 +133,9 @@ void inserir_novo_registro() {
     char endereco[101];
     char cep[9];
     char data_de_nascimento[11];
-
-    printf("Insira o nome completo: ");
+    printf("Insira o nome completo:\n");
+    printf("Nomes e sobrenomes começam com Letras maiusculas!\n");
     gets(nome_completo);
-    while(!validar_nome_completo(nome_completo)) {
-        gets(nome_completo);
-    }
-
     printf("Insira o telefone: ");
     gets(telefone);
     while(!validar_telefone(telefone)) {
@@ -204,10 +169,6 @@ void inserir_novo_registro() {
 int remover_registro() {
     char nome_completo[101];
     printf("Insira o nome completo do contato: ");
-    while(!validar_nome_completo(nome_completo)) {
-        gets(nome_completo);
-    }
-
     gets(nome_completo);
 
     contato* contato = filtrar_contato_por_nome(nome_completo);
@@ -249,8 +210,7 @@ int mostrar_registro() {
 }
 
 void mostrar_todos_registros() {
-    ordenar_lista();
-    
+
     contato* contato_temporario = cabecalho;
     if(contato_temporario == NULL) {
         printf(" --------------------------- \n");
@@ -259,7 +219,7 @@ void mostrar_todos_registros() {
     }
 
     while(contato_temporario) {
-        if(contato_temporario == NULL) 
+        if(contato_temporario == NULL)
             break;
 
         printf(" --------------------------- \n");
@@ -281,7 +241,7 @@ void sair() {
 
     contato* contato_temporario = cabecalho;
     while(contato_temporario) {
-        if(contato_temporario == NULL) 
+        if(contato_temporario == NULL)
             break;
 
         fprintf(contatos_arquivo, "%s\n", contato_temporario->nome_completo);
@@ -307,7 +267,7 @@ void mostrar_menu() {
     printf("4 - Visualizar todos os registros\n");
     printf("5 - Sair do programa\n");
     printf(" --------------------------- \n");
-    
+
     char opcao[2];
     gets(opcao);
     switch(opcao[0]){
@@ -347,9 +307,9 @@ int validar_nome_completo(char* nome_completo) {
 int validar_telefone(char* telefone) {
     int digitos = 0;
     int traco = 0;
-    
+
     if(strlen(telefone) != 10) {
-        printf("Seu telefone deve ter 10 dígitos contando o traco\n");
+        printf("Seu telefone deve ter 10 dígitos contando o traço\n");
         return 0;
     }
 
@@ -367,7 +327,7 @@ int validar_telefone(char* telefone) {
     }
     if(digitos == 9 && traco == 1)
         return 1;
-    else 
+    else
         return 0;
 }
 
@@ -380,7 +340,7 @@ int validar_endereco(char* endereco) {
         return 0;
     } else
         return 1;
-    
+
 }
 
 int validar_cep(char* cep) {
@@ -434,5 +394,4 @@ int validar_data_de_nascimento(char* data_de_nascimento) {
         return 0;
     }
 
-    return 1;
-}
+    return 1;}
