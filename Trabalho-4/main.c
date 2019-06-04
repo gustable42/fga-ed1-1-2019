@@ -21,24 +21,30 @@ typedef struct pista {
     int tempo_necessario;
 } pista;
 
-char codigo_voos[64][6] = {"VG3001", "JJ4404", "LN7001", "TG1501", "GL7602", "TT1010", "AZ1009", "AZ1008", "AZ1010", "TG1506", "VG3002", "JJ4402", "GL7603", "RL7880", "AL0012", "TT4544", "TG1505", "VG3003", "JJ4403", "JJ4401", "LN7002", "AZ1002", "AZ1007", "GL7604", "AZ1006", "TG1503", "AZ1003", "JJ4403", "AZ1001", "LN7003",  "AZ1004",  "TG1504",  "AZ1005",  "TG1502",  "GL7601", "TT4500", "RL7801", "JJ4410", "GL7607", "AL0029", "VV3390", "VV3392", "GF4681", "GF4690", "AZ1020", "JJ4435", "VG3010", "LF0920", "AZ1065", "LF0978", "RL7867", "TT4502", "GL7645", "LF0932", "JJ4434", "TG1510", "TT1020",  "AZ1098",  "BA2312",  "VG3030",  "BA2304",  "KL5609", "KL5610", "KL5611"};
+char codigo_voos[64][7] = {"VG3001", "JJ4404", "LN7001", "TG1501", "GL7602", "TT1010", "AZ1009", "AZ1008", "AZ1010", "TG1506", "VG3002", "JJ4402", "GL7603", "RL7880", "AL0012", "TT4544", "TG1505", "VG3003", "JJ4403", "JJ4401", "LN7002", "AZ1002", "AZ1007", "GL7604", "AZ1006", "TG1503", "AZ1003", "JJ4403", "AZ1001", "LN7003",  "AZ1004",  "TG1504",  "AZ1005",  "TG1502",  "GL7601", "TT4500", "RL7801", "JJ4410", "GL7607", "AL0029", "VV3390", "VV3392", "GF4681", "GF4690", "AZ1020", "JJ4435", "VG3010", "LF0920", "AZ1065", "LF0978", "RL7867", "TT4502", "GL7645", "LF0932", "JJ4434", "TG1510", "TT1020",  "AZ1098",  "BA2312",  "VG3030",  "BA2304",  "KL5609", "KL5610", "KL5611"};
 
 voo* primeiro_da_lista = NULL;
 
-struct voo* criar_novo_voo(char* codigo_do_voo, char modo_do_voo, unsigned int nivel_de_combustivel);
+struct voo* criar_novo_voo(char* codigo_do_voo, unsigned int nivel_de_combustivel, char modo_do_voo);
 struct fila* criar_nova_fila();
 struct pista* criar_nova_pista(int pista);
+
+void liberar_voo_da_lista(struct voo* voo);
 
 void colocar_voo_na_fila(fila* fila, voo* voo);
 void colocar_voos_na_fila(fila* fila);
 void colocar_voo_na_pista(pista* pista, fila* fila, int tempo);
 
 struct voo* tirar_voo_da_fila(fila* fila);
+int tirar_voo_da_fila_force(struct fila* fila, struct voo* voo);
 void mostrar_fila(fila* fila);
 int ordenar_voo(voo* voo_inserido);
-int* ordenar_voos();
+int* criar_voos();
+// void atualizar_lista();
 void mostrar_ordem_voos();
+int calcular_tempo_necessario(int num_pousos, int num_decolagens);
 
+// int tam_lista();
 int checa_alerta_critico(fila* fila);
 int checa_pista_disponivel(struct pista* pista);
 
@@ -48,7 +54,7 @@ int existe_no_vetor(unsigned int numero_sorteado, unsigned int* vetor);
 
 int main() {
     struct fila* fila = criar_nova_fila();
-    int* vetor_voos = ordenar_voos();
+    int* vetor_voos = criar_voos();
 
     printf("Aeroporto Internacional de Brasília\n");
     printf("Hora Inicial: 1\n");
@@ -66,7 +72,9 @@ int main() {
     struct pista* pista2 = criar_nova_pista(2);
     struct pista* pista3 = criar_nova_pista(3);
 
-    while(fila->primeiro) {
+    struct voo* voo_atual = fila->primeiro;
+
+    while(tempo < 200) {
         if(checa_alerta_critico(fila) > 2)
             printf("\n\nAlerta Crítico!\n\n");
 
@@ -81,28 +89,13 @@ int main() {
         pista2->tempo_necessario--;
         pista3->tempo_necessario--;
 
-        if(tempo % 10 == 0) {
-            struct voo* voo_atual = fila->primeiro;
-            while(voo_atual) {
-                if(voo_atual->modo_do_voo == 'A')
-                    voo_atual->nivel_de_combustivel--;
-
-                voo_atual = voo_atual->de_tras;
-            }
-            ordenar_voos();
-            colocar_voos_na_fila(fila);
-            mostrar_fila(fila);
-        }
-
         tempo++;
-        if(fila->primeiro == NULL)
-            break;
     }
     
     return 0;
 }
 
-struct voo* criar_novo_voo(char* codigo_do_voo, char modo_do_voo, unsigned int nivel_de_combustivel) {
+struct voo* criar_novo_voo(char* codigo_do_voo, unsigned int nivel_de_combustivel, char modo_do_voo) {
     voo* novo_voo = (struct voo*)malloc(sizeof(struct voo));
     if(novo_voo == NULL) exit(1);
 
@@ -135,6 +128,12 @@ struct pista* criar_nova_pista(int pista) {
     return nova_pista;
 }
 
+void liberar_voo_da_lista(struct voo* voo) {
+    struct voo* temp = primeiro_da_lista->de_tras;
+    free(primeiro_da_lista);
+    primeiro_da_lista = temp;
+}
+
 void colocar_voo_na_fila(struct fila* fila, struct voo* voo) {
     if(fila->primeiro == NULL) {
         fila->primeiro = voo;
@@ -149,12 +148,14 @@ void colocar_voos_na_fila(fila* fila) {
     struct voo* voo_atual = primeiro_da_lista;
     while(voo_atual) {
         colocar_voo_na_fila(fila, voo_atual);
+
         voo_atual = voo_atual->de_tras;
     }
 }
 
 void colocar_voo_na_pista(pista* pista, fila* fila, int tempo) {
     struct voo* voo = tirar_voo_da_fila(fila);
+    if((voo->modo_do_voo != 'A') && (voo->modo_do_voo != 'D')) exit(1);
 
     if(voo->modo_do_voo == 'A' && (checa_alerta_critico(fila) < 3) && pista->num_pista == 3) {
         colocar_voo_na_fila(fila, voo);
@@ -175,27 +176,53 @@ void colocar_voo_na_pista(pista* pista, fila* fila, int tempo) {
     printf("Horário do início do procedimento: %d\n", tempo);
     printf("Número da pista: %d\n", pista->num_pista);
 
+    liberar_voo_da_lista(voo);
     pista->voo_alocado_a_pista = voo;
 }
 
 struct voo* tirar_voo_da_fila(struct fila* fila) {
-    if(fila->primeiro == NULL)
+    if(!(fila->primeiro))
         return NULL;
 
     struct voo* voo = fila->primeiro;
     fila->primeiro = fila->primeiro->de_tras;
+    if(fila->primeiro == NULL)
+        printf("Fim da fila\n");
 
     return voo;
     
 }
 
+// int tirar_voo_da_fila_force(struct fila* fila, struct voo* voo) {
+//     if(voo == NULL)
+//         return 0;
+
+//     struct voo* voo_atual = primeiro_da_lista;
+
+//     while (voo_atual) {
+//         if(strcmp(voo_atual->de_tras->codigo_do_voo, voo->codigo_do_voo)) {
+//             struct voo* temp = voo_atual->de_tras;
+//             voo_atual->de_tras = temp->de_tras;
+//             free(temp);
+//             return 1;
+//         }
+
+//         voo_atual = voo_atual->de_tras;
+//     }
+    
+//     return 0;
+    
+// }
+
 void mostrar_fila(fila* fila) {
     struct voo* voo_atual = fila->primeiro;
     printf("---\n");
-    while(voo_atual != NULL) {
+    while(voo_atual) {
         char prioridade[6] = "Baixa";
+        int de_tras = 1;
         if(voo_atual->nivel_de_combustivel == 0)
             strcpy(prioridade, "Alta");
+
         
         printf("%s - %c - %s\n", voo_atual->codigo_do_voo, voo_atual->modo_do_voo, prioridade);
 
@@ -230,7 +257,7 @@ int ordenar_voo(voo* voo_inserido) {
     return 0;
 }
 
-int* ordenar_voos() {
+int* criar_voos() {
     int* vetor_retorno = (int*)malloc(sizeof(int) * 3);
 
     int num_decolagem = gerar_numero_aleatorio(10, 32);
@@ -253,13 +280,41 @@ int* ordenar_voos() {
 
         if(modo_de_voo == 'A') nivel_de_combustivel = gerar_numero_aleatorio(0, 12);
 
-        struct voo* novo_voo = criar_novo_voo(codigo_voos[vetor_num_aleatorios[i]], modo_de_voo, nivel_de_combustivel);
+        struct voo* novo_voo = criar_novo_voo(codigo_voos[vetor_num_aleatorios[i]], nivel_de_combustivel, modo_de_voo);
         int result_ordenacao = ordenar_voo(novo_voo);
         if(result_ordenacao == 0) break;
     }
 
     return vetor_retorno;
 }
+
+// void atualizar_lista() {
+
+//     struct voo *temp1, *temp2;
+
+//     for(temp1 = primeiro_da_lista; temp1!=NULL; temp1=temp1->de_tras) {
+//         for(temp2 = temp1->de_tras; temp2!=NULL; temp2=temp2->de_tras) {
+//             if(temp2->nivel_de_combustivel >= temp1->nivel_de_combustivel) {
+//                 char codigo_do_voo[6];
+//                 strcpy(codigo_do_voo, temp2->codigo_do_voo);
+//                 struct voo* de_tras = temp2->de_tras;
+//                 char modo_do_voo = temp2->modo_do_voo;
+//                 int nivel_de_combustivel = temp2->nivel_de_combustivel;
+
+//                 strcpy(temp2->codigo_do_voo, temp1->codigo_do_voo);
+//                 temp2->de_tras = temp1->de_tras;
+//                 temp2->modo_do_voo = temp1->modo_do_voo;
+//                 temp2->nivel_de_combustivel = temp1->nivel_de_combustivel;
+
+//                 strcpy(temp1->codigo_do_voo, codigo_do_voo);
+//                 temp1->de_tras = de_tras;
+//                 temp1->modo_do_voo = modo_do_voo;
+//                 temp1->nivel_de_combustivel = nivel_de_combustivel;
+
+//             }
+//         }
+//     }
+// }
 
 void mostrar_ordem_voos() {
     struct voo* voo_atual = primeiro_da_lista;
@@ -275,6 +330,22 @@ void mostrar_ordem_voos() {
     }
     printf("---\n");
 }
+
+int calcular_tempo_necessario(int num_pousos, int num_decolagens) {
+    return 0;
+}
+
+// int tam_lista() {
+//     struct voo* voo_atual = primeiro_da_lista;
+//     int num_lista = 0;
+
+//     while(voo_atual) {
+//         num_lista++;
+//         voo_atual = voo_atual->de_tras;
+//     }
+
+//     return num_lista;
+// }
 
 int checa_alerta_critico(fila* fila) {
     struct voo* voo_atual = fila->primeiro;
