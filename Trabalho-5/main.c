@@ -13,8 +13,8 @@ struct node* loadTreeFromFile(char* file);
 void showTree(struct node* root);
 void isFull(struct node* root);
 void searchValue(struct node* root, int search_value);
-void removeValue(struct node* root, int search_value);
 int getHeight(struct node* root);
+void removeValue(struct node* root, int search_value);
 
 struct node* generateRoot();
 struct node* generateNode(int value);
@@ -23,6 +23,7 @@ int numberOfNodes(struct node* root);
 int heightOfNode(struct node* root, int search_value);
 int findValue(struct node* root, struct node* node, int search_value);
 int isValueRemoved(struct node* root, int search_value);
+int rootSuccessor(struct node* root);
 
 //*** MAIN ***//
 int main() {
@@ -78,11 +79,6 @@ void searchValue(struct node* root, int search_value) {
         printf("Nó com valor procurado não encontrado\n");
 }
 
-void removeValue(struct node* root, int search_value) {
-    if(!isValueRemoved(root, search_value))
-        printf("Nó com valor inserido não encontrado\n");
-}
-
 int getHeight(struct node* root) {
     if(!root)
         return 0;
@@ -94,6 +90,11 @@ int getHeight(struct node* root) {
 
     if(left_branch >= right_branch) return left_branch + 1;
     else return right_branch + 1;
+}
+
+void removeValue(struct node* root, int search_value) {
+    if(!isValueRemoved(root, search_value))
+        printf("Nó com valor inserido não encontrado\n");
 }
 
 // *** AUX FUNCTIONS *** //
@@ -202,11 +203,38 @@ int findValue(struct node* root, struct node* node, int search_value) {
 int isValueRemoved(struct node* root, int search_value) {
     if(!root)
         return 0;
+
+    if(root->value == search_value) {
+        int successor = rootSuccessor(root);
+        root->value = successor;
+        printf("NODE DELETED\n");
+        return 1;
+    }
     
     if(root->left != NULL) {
         if(root->left->value == search_value) {
             if(root->left->left == NULL && root->left->right == NULL) {
                 free(root->left);
+                printf("NODE DELETED\n");
+                return 1;
+            }
+            if(root->left->left == NULL && root->left->right != NULL) {
+                struct node* temp = root->left;
+                root->left = root->left->right;
+                free(temp);
+                printf("NODE DELETED\n");
+                return 1;
+            }
+            if(root->left->left != NULL && root->left->right == NULL) {
+                struct node* temp = root->left;
+                root->left = root->left->left;
+                free(temp);
+                printf("NODE DELETED\n");
+                return 1;
+            }
+            if(root->left->left != NULL && root->left->right != NULL) {
+                int successor = rootSuccessor(root);
+                root->value = successor;
                 printf("NODE DELETED\n");
                 return 1;
             }
@@ -220,6 +248,26 @@ int isValueRemoved(struct node* root, int search_value) {
                 printf("NODE DELETED\n");
                 return 1;
             }
+            if(root->right->left == NULL && root->right->right != NULL) {
+                struct node* temp = root->right;
+                root->right = root->right->right;
+                free(temp);
+                printf("NODE DELETED\n");
+                return 1;
+            }
+            if(root->right->left != NULL && root->right->right == NULL) {
+                struct node* temp = root->right;
+                root->right = root->right->left;
+                free(temp);
+                printf("NODE DELETED\n");
+                return 1;
+            }
+            if(root->right->left != NULL && root->right->right != NULL) {
+                int successor = rootSuccessor(root);
+                root->value = successor;
+                printf("NODE DELETED\n");
+                return 1;
+            }
         }
     }
 
@@ -230,4 +278,18 @@ int isValueRemoved(struct node* root, int search_value) {
         return 1;
     else
         return 0;
+}
+
+int rootSuccessor(struct node* root) {
+    struct node* temp = root;
+    root = root->right;
+    while(root) {
+        int value = root->value;
+        if(root->left == NULL) {
+            free(root);
+            return value;
+        }
+        root = root->left;
+    }
+    return 0;
 }
