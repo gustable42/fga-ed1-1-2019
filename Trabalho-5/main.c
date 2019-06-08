@@ -15,6 +15,9 @@ void isFull(struct node* root);
 void searchValue(struct node* root, int search_value);
 int getHeight(struct node* root);
 void removeValue(struct node* root, int search_value);
+void printInOrder(struct node* root);
+void printPreOrder(struct node* root);
+void printPostOrder(struct node* root);
 
 struct node* generateRoot();
 struct node* generateNode(int value);
@@ -28,9 +31,12 @@ int rootSuccessor(struct node* root);
 //*** MAIN ***//
 int main() {
     struct node* root = loadTreeFromFile("BSTs/bst1.txt");
-    int search_value;
-    scanf("%d", &search_value);
-    removeValue(root, search_value);
+    printInOrder(root);
+    printf("\n");
+    printPreOrder(root);
+    printf("\n");
+    printPostOrder(root);
+    printf("\n");
 
     return 0;
 }
@@ -95,6 +101,33 @@ int getHeight(struct node* root) {
 void removeValue(struct node* root, int search_value) {
     if(!isValueRemoved(root, search_value))
         printf("Nó com valor inserido não encontrado\n");
+}
+
+void printInOrder(struct node* root) {
+    if(!root)
+        return;
+
+    printInOrder(root->left);
+    printf("%d ", root->value);
+    printInOrder(root->right);
+}
+
+void printPreOrder(struct node* root) {
+    if(!root)
+        return;
+
+    printf("%d ", root->value);
+    printInOrder(root->left);
+    printInOrder(root->right);
+}
+
+void printPostOrder(struct node* root) {
+    if(!root)
+        return;
+
+    printInOrder(root->left);
+    printInOrder(root->right);
+    printf("%d ", root->value);
 }
 
 // *** AUX FUNCTIONS *** //
