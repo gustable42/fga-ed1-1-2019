@@ -13,6 +13,7 @@ struct node* loadTreeFromFile(char* file);
 void showTree(struct node* root);
 void isFull(struct node* root);
 void searchValue(struct node* root, int search_value);
+void removeValue(struct node* root, int search_value);
 int getHeight(struct node* root);
 
 struct node* generateRoot();
@@ -21,13 +22,14 @@ void insertNode(int node_value, struct node* *(current_node));
 int numberOfNodes(struct node* root);
 int heightOfNode(struct node* root, int search_value);
 int findValue(struct node* root, struct node* node, int search_value);
+int isValueRemoved(struct node* root, int search_value);
 
 //*** MAIN ***//
 int main() {
     struct node* root = loadTreeFromFile("BSTs/bst1.txt");
     int search_value;
     scanf("%d", &search_value);
-    searchValue(root, search_value);
+    removeValue(root, search_value);
 
     return 0;
 }
@@ -74,6 +76,11 @@ void searchValue(struct node* root, int search_value) {
     int value_found = findValue(root, root, search_value);
     if(!value_found)
         printf("Nó com valor procurado não encontrado\n");
+}
+
+void removeValue(struct node* root, int search_value) {
+    if(!isValueRemoved(root, search_value))
+        printf("Nó com valor inserido não encontrado\n");
 }
 
 int getHeight(struct node* root) {
@@ -187,6 +194,39 @@ int findValue(struct node* root, struct node* node, int search_value) {
     if(node->right != NULL)
 
     if(left_branch + right_branch > 0)
+        return 1;
+    else
+        return 0;
+}
+
+int isValueRemoved(struct node* root, int search_value) {
+    if(!root)
+        return 0;
+    
+    if(root->left != NULL) {
+        if(root->left->value == search_value) {
+            if(root->left->left == NULL && root->left->right == NULL) {
+                free(root->left);
+                printf("NODE DELETED\n");
+                return 1;
+            }
+        }
+    }
+
+    if(root->right != NULL) {
+        if(root->right->value == search_value) {
+            if(root->right->left == NULL && root->right->right == NULL) {
+                free(root->right);
+                printf("NODE DELETED\n");
+                return 1;
+            }
+        }
+    }
+
+    int left_branch = isValueRemoved(root->left, search_value);
+    int right_branch = isValueRemoved(root->right, search_value);
+
+    if(left_branch || right_branch)
         return 1;
     else
         return 0;
