@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <string.h>
 
 //Funções relacionadas ao cálculo do ILBP
 int* ilbp(char* img_path);
@@ -14,8 +15,11 @@ float* glcm(char* img_path);
 float* normaliza_vetor(float* vetor, int tamanho);
 
 int main() {
-    int* ilbp_vetor = ilbp("DataSet/asphalt/asphalt_01.txt");
-    float* glcm_caracteristicas = glcm("DataSet/asphaltc/asphalt_01.txt");
+
+    char file_path[] = "DataSet/grass/grass_49.txt";
+
+    int* ilbp_vetor = ilbp(file_path);
+    float* glcm_caracteristicas = glcm(file_path);
 
     float* features = (float*)malloc(536 * sizeof(float));
 
@@ -27,11 +31,15 @@ int main() {
         *(features + i) = *(glcm_caracteristicas + temp_i);
     }
 
-    float* features_normalizado = normaliza_vetor(features, 536);
+    float* features_normalizadas = normaliza_vetor(features, 536);
+
+    FILE* features_file = fopen("Features/grass/grass_49.txt", "w");
 
     for(int i = 0; i < 536; i++) {
-        printf("%f\n", *(features_normalizado + i));
+        fprintf(features_file, "%f ", *(features_normalizadas + i));
     }
+
+    fclose(features_file);
 }
 
 int* ilbp(char* img_path) {
@@ -60,7 +68,7 @@ int* ilbp(char* img_path) {
             *(ilbp_vetor + ilbp_position) = *(ilbp_vetor + ilbp_position) + 1;
         }
     }
-
+    fclose(img);
     return ilbp_vetor;
 }
 
@@ -196,7 +204,7 @@ float* glcm(char* img_path) {
         *(features + posicao_na_feature + 1) = energia;
         *(features + posicao_na_feature + 2) = contraste;
     }
-
+    fclose(img);
     return features;
 }
 
